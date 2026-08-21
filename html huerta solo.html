@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huerta Escolar Inteligente y Solidaria</title>
+  
+  <!-- Fuentes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Archivo CSS externo -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Escuela de Educación Secundaria Técnica N°1 · Miramar · 6° Año Informática</span>
+  <h1>Huerta Escolar <span>Inteligente</span> y Solidaria</h1>
+  <p class="lead">
+    Un sistema de riego automatizado con ESP32, sensores de humedad y recolección de agua de
+    lluvia, pensado para producir alimentos frescos y compartirlos con familias de la comunidad
+    educativa.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="num">8×10 m</div><div class="lbl">Superficie de la huerta</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">Zonas de cultivo automatizadas</div></div>
+    <div class="stat"><div class="num">200 L</div><div class="lbl">Tanque de agua de lluvia</div></div>
+    <div class="stat"><div class="num">12 V</div><div class="lbl">Tensión de todo el sistema</div></div>
+    <div class="stat"><div class="num">&lt;40% / &gt;95%</div><div class="lbl">Umbral que enciende / apaga el riego</div></div>
+  </div>
+</header>
+
+<section class="objetivo">
+  <div class="objetivo-inner">
+    <div>
+      <span class="eyebrow">Objetivo</span>
+      <h2>Por qué lo hacemos</h2>
+    </div>
+    <p>
+      Diseñar y construir una huerta que riegue sola cuando la tierra lo necesita, priorizando el
+      agua de lluvia por sobre la red escolar, para aplicar en un problema real los conocimientos
+      de electrónica, programación y automatización de la Especialidad Informática — y destinar
+      la producción de zapallo, acelga y espinaca a familias de la comunidad educativa.
+    </p>
+  </div>
+</section>
+
+<section class="funcionamiento" id="funcionamiento">
+  <span class="eyebrow">Funcionamiento</span>
+  <h2>Cómo funciona la huerta</h2>
+  <p class="intro">
+    La huerta está techada, así que la lluvia no llega directo a la tierra: por eso el riego lo
+    decide un sistema automático y no el clima. Así es como trabajan sus tres partes.
+  </p>
+
+  <div class="bloque-func">
+    <span class="sub">Ciclo de riego automático</span>
+    <h3>La ESP32 decide cuándo regar</h3>
+    <p>
+      Cada pocos segundos la ESP32 lee los tres sensores de humedad de suelo (uno por zona),
+      convierte esa lectura en un porcentaje y compara el valor contra dos umbrales fijos. Si hace
+      falta regar, pone en LOW el pin del relé (lógica inversa) y ese relé cierra el circuito de 12V
+      que enciende la bomba durante un tiempo controlado.
+    </p>
+    <div class="flujo">
+      <div class="paso"><span class="n">01</span><strong>Sensor de humedad</strong><span>Entra al suelo y entrega una señal analógica a la ESP32.</span></div>
+      <div class="paso"><span class="n">02</span><strong>ESP32 procesa</strong><span>Convierte la lectura a % y la compara con los umbrales.</span></div>
+      <div class="paso"><span class="n">03</span><strong>Relé conmuta</strong><span>Activa la bomba de 12V mediante lógica inversa (LOW = ON).</span></div>
+      <div class="paso"><span class="n">04</span><strong>Riego por goteo</strong><span>El agua sale por microperforaciones cada 15–20 cm.</span></div>
+    </div>
+
+    <div class="umbral-box">
+      <div class="umbral seco"><b>&lt; 40%</b>Humedad del suelo — se activa el riego</div>
+      <div class="umbral humedo"><b>&gt; 95%</b>Humedad del suelo — se corta el riego</div>
+    </div>
+    <p style="margin-top:14px; font-size:0.85rem; color:#6b6156;">
+      Trabajar con dos umbrales distintos (histéresis) evita que la bomba se encienda y apague
+      todo el tiempo cuando la humedad ronda un único valor.
+    </p>
+  </div>
+
+  <div class="bloque-func">
+    <span class="sub">Sensor de lluvia</span>
+    <h3>FC-37: registra la lluvia, no riega por ella</h3>
+    <p>
+      Como el techo de la huerta impide que la lluvia moje la tierra, el sensor FC-37 no participa
+      en la decisión de regar: se instala afuera, inclinado a 45° para que el agua escurra rápido, y
+      su única tarea es detectar precipitaciones para armar un historial climático.
+    </p>
+    <div class="lluvia-caja">
+      <div class="estado seco"><b>Placa seca → HIGH</b>Sin conducción eléctrica entre las pistas metálicas: el módulo entrega 1 lógico y la ESP32 registra "no llueve".</div>
+      <div class="estado mojado"><b>Placa mojada → LOW</b>Las gotas conducen electricidad entre las pistas: la salida cae a 0 lógico y la ESP32 registra el evento de lluvia.</div>
+    </div>
+  </div>
+
+  <div class="bloque-func" style="margin-bottom:0;">
+    <span class="sub">¿De dónde sale el agua?</span>
+    <h3>Siempre primero la lluvia, la red escolar solo de respaldo</h3>
+    <p>
+      El sistema es dual: la bomba toma agua del tanque en todos los casos posibles, y solo se
+      habilita la conexión a la red de la escuela cuando esa fuente no alcanza.
+    </p>
+    <div class="fuentes">
+      <div class="fuente principal">
+        <span class="badge">Fuente principal</span>
+        <h4>Tanque de agua de lluvia — 200 L</h4>
+        <p>Se llena con canaletas de PVC que bajan el agua del techo de la escuela. Es la fuente que usa la bomba en el uso normal del sistema, todos los días que haya agua disponible.</p>
+      </div>
+      <div class="fuente respaldo">
+        <span class="badge">Fuente de respaldo</span>
+        <h4>Red de agua de la escuela</h4>
+        <p>Conectada por una cañería de PVC de 1/2" con llave de paso manual. Solo se recurre a ella cuando el tanque de lluvia se vacía o hay sequía prolongada, nunca en primer lugar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="especies" id="especies">
+  <span class="eyebrow">Especies cultivadas</span>
+  <h2>Tres zonas, tres cultivos</h2>
+  <p>Cada cantero tiene su propio sensor de humedad de suelo. Tocá una tarjeta para ver una lectura simulada.</p>
+
+  <div class="cultivos">
+
+    <div class="cultivo" data-humedad="62" data-riego-dias="3">
+      <div class="bed"><div class="row"><span></span><span></span><span></span><span></span></div></div>
+      <div class="cultivo-body">
+        <span class="zona-tag">Zona 1 · 3×3 m</span>
+        <h3>Zapallo</h3>
+        <p>Cultivo de mayor porte, ubicado en el sector con más espacio disponible de la huerta.</p>
+        <div class="humedad-row">
+          <span>Humedad</span>
+          <div class="humedad-bar"><div class="humedad-fill"></div></div>
+          <span class="valor">--%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cultivo" data-humedad="47" data-riego-dias="2">
+      <div class="bed"><div class="row"><span></span><span></span><span></span><span></span></div></div>
+      <div class="cultivo-body">
+        <span class="zona-tag">Zona 2 · 3×2 m</span>
+        <h3>Acelga</h3>
+        <p>Hoja verde de ciclo corto, con riego por goteo de infiltración lenta cada 15–20 cm.</p>
+        <div class="humedad-row">
+          <span>Humedad</span>
+          <div class="humedad-bar"><div class="humedad-fill"></div></div>
+          <span class="valor">--%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cultivo" data-humedad="38" data-riego-dias="2">
+      <div class="bed"><div class="row"><span></span><span></span><span></span><span></span></div></div>
+      <div class="cultivo-body">
+        <span class="zona-tag">Zona 3 · 3×2 m</span>
+        <h3>Espinaca</h3>
+        <p>Sensible a la sequía: es la zona que más rápido activa el riego automático.</p>
+        <div class="humedad-row">
+          <span>Humedad</span>
+          <div class="humedad-bar"><div class="humedad-fill"></div></div>
+          <span class="valor">--%</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="hint">La lectura se simula en el navegador a modo ilustrativo — no proviene de un sensor real.</p>
+
+  <div class="riego-titulo">
+    <span class="sub">regarHuerta()</span>
+    <h3>Cronograma de riego generado por el sistema</h3>
+    <p>Calculado en el navegador a partir de los datos cargados en "Especies cultivadas" (también se imprime por consola).</p>
+    <ul class="riego-lista" id="riegoLista"></ul>
+  </div>
+</section>
+
+<section class="cronograma" id="cronograma">
+  <div class="cronograma-inner">
+    <span class="eyebrow">Cronograma</span>
+    <h2>Plan de tareas</h2>
+    <p>Marcá cada tarea a medida que se completa para llevar el seguimiento del armado de la huerta.</p>
+
+    <div class="progreso">
+      <div class="progreso-top">
+        <span id="progresoTxt">0 / 8 tareas completadas</span>
+        <span id="progresoPct">0%</span>
+      </div>
+      <div class="progreso-track"><div class="progreso-fill" id="progresoFill"></div></div>
+    </div>
+
+    <ul class="tareas" id="listaTareas">
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Diseño y planificación</strong>
+          <span class="desc">Definición de zonas, dimensiones y materiales a reutilizar.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Armado de canteros</strong>
+          <span class="desc">Estructura con pallets, chapas y tanques recuperados.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Instalación eléctrica</strong>
+          <span class="desc">Gabinete IP65, cableado corrugado y conexión del relé.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Programación de la ESP32</strong>
+          <span class="desc">Lógica de lectura de sensores y control de la bomba en Arduino IDE.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Recolección de agua de lluvia</strong>
+          <span class="desc">Canaletas de PVC hacia el tanque de 200 litros.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Riego por goteo</strong>
+          <span class="desc">Colector unificado y mangueras con microperforaciones.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Siembra</strong>
+          <span class="desc">Zapallo, acelga y espinaca en sus tres zonas.</span>
+        </div>
+      </li>
+      <li class="tarea">
+        <div class="check">✓</div>
+        <div class="tarea-txt">
+          <strong>Monitoreo y primera cosecha</strong>
+          <span class="desc">Ajuste de umbrales de riego y donación de la producción.</span>
+        </div>
+      </li>
+    </ul>
+
+  </div>
+</section>
+
+<footer>
+  Huerta Escolar Inteligente y Solidaria — Especialidad Informática, EEST N°1 Miramar
+</footer>
+
+<!-- Archivo JS externo -->
+<script src="script.js"></script>
+</body>
+</html>
